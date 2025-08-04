@@ -14,8 +14,45 @@
 - Windows PowerShellでも動作しますが、最新のPowerShellの方が高速で安定しています。
 
 ## 前提環境のインストール
-- [Git](windows/install_git.md)
-- [uv](windows/install_uv.md)
+
+### Gitのインストール
+https://git-scm.com/download/win からGit for Windowsをダウンロードしてインストールします。
+
+#### インストール手順
+1. 上記リンクから最新版のGit for Windowsをダウンロード
+2. ダウンロードしたexeファイルを実行
+3. インストールウィザードに従って進む（デフォルト設定で問題ありません）
+
+#### インストール確認
+コマンドプロンプトまたはPowerShellを開いて以下を実行：
+```cmd
+git --version
+```
+
+### uvのインストール
+
+#### PowerShell（推奨）
+PowerShell 7.4以降を使用することを推奨します。
+
+```powershell
+# PowerShell（管理者権限で実行）
+irm https://astral.sh/uv/install.ps1 | iex
+```
+
+#### コマンドプロンプト
+PowerShellが使用できない場合：
+
+```cmd
+# コマンドプロンプト（管理者権限で実行）  
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+#### インストール確認
+```powershell
+uv --version
+```
+
+正常にインストールされていれば、バージョン情報が表示されます。
 
 # 設定手順
 

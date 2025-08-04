@@ -13,11 +13,64 @@
 - 正しい例：`/Users/tanaka/Meipu2-demo` または `/Users/username/Meipu2-demo`
 
 ## 前提環境のインストール
-- [brew](arm64-mac/install_brew.md)
-- [Git](arm64-mac/install_git.md#gitのインストール)
-- [Git LFS](arm64-mac/install_git.md#gitlfsのインストール)
-- [uv](arm64-mac/install_uv.md)
-- [direnv](arm64-mac/install_direnv.md)
+
+### Homebrewのインストール
+
+#### インストール
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+#### パスの設定
+インストール後、以下のコマンドを実行してパスを設定：
+
+```bash
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### インストール確認
+```bash
+brew --version
+```
+
+### Gitのインストール
+```bash
+brew install git
+source ~/.zshrc
+which git  # /opt/homebrew/bin/git と表示されることを確認
+```
+
+### uvのインストール
+
+#### インストール
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.zshrc
+```
+
+#### インストール確認
+```bash
+uv --version
+```
+
+### direnvのインストール
+
+#### インストール
+```bash
+brew install direnv
+```
+
+#### シェル設定
+```bash
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### インストール確認
+```bash
+direnv --version
+```
 
 <!-- TODO: ここにインストール/チェックスクリプト -->
 これらのツールのインストールをまとめたスクリプトがあるので、これを実行します。
