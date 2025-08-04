@@ -1,0 +1,9 @@
+/.venv/
+**/__pycache__/
+.DS_Store
+credentials.json
+.envrc
+*.wav
+tmprecord.*
+
+**/poco-poco-1.12.5-release/

@@ -1,0 +1,9 @@
+[submodule "dictation-kit"]
+	path = dictation-kit
+	url = https://github.com/Meipu2-demo/dictation-kit.git
+[submodule "MMDAgent-EX"]
+	path = MMDAgent-EX
+	url = https://github.com/Meipu2-demo/MMDAgent-EX.git
+[submodule "contents"]
+	path = contents
+	url = https://github.com/mmdagent-ex/example.git

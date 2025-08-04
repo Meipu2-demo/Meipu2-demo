@@ -1,0 +1,5 @@
+source .venv/bin/activate
+export MEIPU_ROOT_PATH=$(pwd)
+
+# 以下を編集
+export MEIPU_GEMINI_API_KEY="YoUrApIkEyIsHeRe"
