@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # External components download script for Meipu2-demo
-# This script downloads MMDAgent-EX, contents (example), gene submodule, and dictation-kit
+# This script downloads contents (example), gene submodule, and dictation-kit
 
 set -e
 
@@ -48,13 +48,6 @@ download_and_extract() {
     rm "$filename"
     echo "Setup complete for $target_name"
 }
-
-# MMDAgent-EXをダウンロード・展開
-download_and_extract \
-    "mmdagent-ex.zip" \
-    "https://github.com/mmdagent-ex/MMDAgent-EX/archive/68cab52c55781d843194fb26efc53089f1e6287b.zip" \
-    "MMDAgent-EX-68cab52c55781d843194fb26efc53089f1e6287b" \
-    "MMDAgent-EX"
 
 # contentsをダウンロード・展開
 download_and_extract \

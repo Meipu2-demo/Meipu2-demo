@@ -89,11 +89,11 @@ git clone https://github.com/Meipu2-demo/Meipu2-demo.git
 ```
 
 ## 2. サブモジュールの初期化
-Meipu2-demoディレクトリに移動し、Gitサブモジュールを初期化します。
+Meipu2-demoディレクトリに移動し、`contents` と `dictation-kit` のサブモジュールを初期化します。
 
 ```bash
 cd ~/Meipu2-demo
-git submodule update --init --recursive
+git submodule update --init --recursive contents dictation-kit
 ```
 
 
@@ -101,6 +101,8 @@ git submodule update --init --recursive
 https://mmdagent-ex.dev/ja/docs/build/#macos
 を参考にビルドをしてください。
 ```bash
+cd ~/Meipu2-demo
+git clone https://github.com/mmdagent-ex/MMDAgent-EX.git MMDAgent-EX
 cd ./MMDAgent-EX
 brew install cmake glew libjpeg jpeg-turbo re2 portaudio minizip libsndfile libsamplerate sox rabbitmq-c libomp librdkafka
 cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
