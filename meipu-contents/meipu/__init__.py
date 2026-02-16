@@ -1,4 +1,6 @@
 from .gemini import Gemini
+from .ollama import Ollama
+from .llm_factory import create_llm_client
 from .utils import (
     generate_response_run,
     transcribe_file,
@@ -11,6 +13,8 @@ from .utils import (
 
 __all__ = [
     "Gemini",
+    "Ollama",
+    "create_llm_client",
     "generate_response_run",
     "transcribe_file",
     "connect_julius",

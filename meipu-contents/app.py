@@ -11,8 +11,8 @@ import emoji
 from google.cloud import speech
 
 from meipu import (
-    Gemini,
     connect_julius,
+    create_llm_client,
     drain_julius_socket,
     generate_response_run,
     send_julius_command,
@@ -112,7 +112,7 @@ def main():
         "こんにちは、今日のお休みはどう過ごしましたか？",
     ]
     first_assistant_content = random.choice(first_assistant_content_list)
-    gemini_client = Gemini(first_assistant_content)
+    llm_client = create_llm_client(first_assistant_content)
 
     # 字幕
     print("CAPTION_SETSTYLE|meipu-font|NotoSansJPwithEmoji.ttf|1,0.5,0,1|1,1,1,1,4|0,0,0,0.6,6|0,0,0,0")
@@ -127,7 +127,7 @@ def main():
     print("CAPTION_STOP|agent_context_log")
 
     # エージェントの応答を生成するスレッドを起動
-    thread1 = threading.Thread(target=generate_response_run, args=(gemini_client, input_queue, output_queue))
+    thread1 = threading.Thread(target=generate_response_run, args=(llm_client, input_queue, output_queue))
     thread1.start()
 
     user_utterance = ""

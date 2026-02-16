@@ -7,14 +7,18 @@ import time
 from google.cloud import speech
 
 
-def generate_response_run(gemini_client, input_queue, output_queue):
+def generate_response_run(llm_client, input_queue, output_queue):
     """
     ユーザーの発言を受け取り、応答を生成する
     """
     while True:
         user_input = input_queue.get()
         print(f"認識: {user_input}", file=sys.stderr)
-        queue = gemini_client.play_response(user_input)
+        queue = llm_client.play_response(user_input)
+        if not queue:
+            output_queue.put("***END***")
+            input_queue.task_done()
+            continue
         for item in queue:
             output_queue.put(item)
         input_queue.task_done()
