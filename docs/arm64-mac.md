@@ -101,6 +101,8 @@ git submodule update --init --recursive
 https://mmdagent-ex.dev/ja/docs/build/#macos
 を参考にビルドをしてください。
 ```bash
+cd ~/Meipu2-demo
+git clone https://github.com/mmdagent-ex/MMDAgent-EX.git MMDAgent-EX
 cd ./MMDAgent-EX
 brew install cmake glew libjpeg jpeg-turbo re2 portaudio minizip libsndfile libsamplerate sox rabbitmq-c libomp librdkafka
 cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release

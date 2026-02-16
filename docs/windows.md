@@ -74,7 +74,12 @@ git submodule update --init --recursive
 ## 3. MMDAgent-EXの実行バイナリをダウンロード
 ビルド済みのMMDAgent-EXを使用します。
 
-https://github.com/mmdagent-ex/MMDAgent-EX/releases から最新のWindows版（MMDAgent-EX-*-windows.zip）をダウンロードし、`Meipu2-demo`フォルダ内の`MMDAgent-EX`フォルダに展開してください。
+以下のコマンドで、`MMDAgent-EX-x64-v2.X.zip` をダウンロードして `MMDAgent-EX` フォルダに展開します。
+
+```powershell
+cd C:\Meipu2-demo
+.\core\scripts\download-mmdagent-ex-windows.bat
+```
 
 展開後、以下のような構成になります：
 ```
@@ -149,6 +154,7 @@ C:\
       ├─ .envrc.example
       ├─ core\
       │  └─ scripts\
+      │     ├─ download-mmdagent-ex-windows.bat
       │     ├─ setup-env-windows.bat
       │     └─ julius-windows.bat
       ├─ .gitattributes

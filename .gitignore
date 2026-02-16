@@ -3,7 +3,9 @@
 .DS_Store
 credentials.json
 .envrc
+.env
 *.wav
 tmprecord.*
+/MMDAgent-EX/
 
 **/poco-poco-1.12.5-release/

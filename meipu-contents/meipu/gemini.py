@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 
 GEMINI_MESSAGE_HISTORY_MAX = 5
-GEMINI_MODEL = 'gemini-2.0-flash-lite'
+GEMINI_MODEL = 'gemini-2.5-flash-lite'
 
 
 class Gemini:
@@ -35,7 +35,7 @@ class Gemini:
         """
         self.gemini_messages.append({"role": "user", "parts": [en_prompt]})
         if first_assistant_content:
-            self.gemini_messages.append({"role": "assistant", "parts": [first_assistant_content]})
+            self.gemini_messages.append({"role": "model", "parts": [first_assistant_content]})
 
     def play_response(self, user_input):
         queue = []
@@ -49,7 +49,7 @@ class Gemini:
             return
     
         completion_text = re.sub(r'[\n\r]+', '', completion.text) 
-        self.gemini_messages.append({"role": "assistant", "parts": [completion_text]})
+        self.gemini_messages.append({"role": "model", "parts": [completion_text]})
 
         if len(self.gemini_messages) > GEMINI_MESSAGE_HISTORY_MAX * 2 + 1:
             self.gemini_messages.pop(1)
