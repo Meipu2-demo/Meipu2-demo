@@ -81,10 +81,16 @@ def get_latest_wav_file_after(record_path: pathlib.Path, after_timestamp: float)
     return str(latest_path) if latest_path else None
 
 
-def synth_with_asr_guard(julius_socket: socket.socket, voice: str, content: str):
+def pause_asr(julius_socket: socket.socket):
     send_julius_command(julius_socket, "TERMINATE")
+
+
+def synth_once(voice: str, content: str):
     print(f"SYNTH_START|uka|{voice}|{content}")
     wait_till_synth_event_stop()
+
+
+def resume_asr_with_guard(julius_socket: socket.socket):
     time.sleep(ASR_RESUME_GUARD_SEC)
     drain_julius_socket(julius_socket, JULIUS_DRAIN_SEC)
     send_julius_command(julius_socket, "RESUME")
@@ -113,7 +119,9 @@ def main():
     print(f"CAPTION_START|agent_context_log|meipu-font|{first_assistant_content}|3.0|CENTER|0.2|{30*60*15}")
     # モーション
     print("MOTION_ADD|uka|base|../contents/uka/motion/01_happy.vmd")
-    listening_since = synth_with_asr_guard(julius_socket, "mei_voice_happy", first_assistant_content)
+    pause_asr(julius_socket)
+    synth_once("mei_voice_happy", first_assistant_content)
+    listening_since = resume_asr_with_guard(julius_socket)
 
     print("MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
     print("CAPTION_STOP|agent_context_log")
@@ -154,6 +162,7 @@ def main():
         input_queue.put(user_input)
 
         # エージェントの応答を処理
+        spoke_any = False
         while True:
             assistant_content = output_queue.get()
             if assistant_content == "***END***":
@@ -205,10 +214,17 @@ def main():
                     motion = value
                     break
 
+            if not spoke_any:
+                pause_asr(julius_socket)
+                spoke_any = True
+
             print(f"MOTION_ADD|uka|base|../contents/uka/motion/{motion}.vmd")
             print(f"CAPTION_START|agent_context_log|meipu-font|{assistant_content}|3.0|CENTER|0.2|{30*60*15}")
-            listening_since = synth_with_asr_guard(julius_socket, voice, assistant_content)
+            synth_once(voice, assistant_content)
             print("MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
+
+        if spoke_any:
+            listening_since = resume_asr_with_guard(julius_socket)
 
         print("CAPTION_STOP|user_context_log")
         print("CAPTION_STOP|agent_context_log")
