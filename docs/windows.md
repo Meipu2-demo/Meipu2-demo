@@ -129,6 +129,10 @@ cd C:\Meipu2-demo
 uv sync
 copy .envrc.example .env
 # メモ帳で.envを編集してMEIPU_GEMINI_API_KEYにGemini APIキーを設定
+# (任意) Ollamaデモ利用者のみ以下も設定
+# USE_OLLAMA=True
+# OLLAMA_BASE_URL=http://100.126.126.77:11434
+# OLLAMA_MODEL=qwen3-coder:30b
 notepad .env
 ```
 

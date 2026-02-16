@@ -8,3 +8,4 @@ export MEIPU_GEMINI_API_KEY="YoUrApIkEyIsHeRe"
 # export USE_OLLAMA=True
 # export OLLAMA_BASE_URL="http://100.126.126.77:11434"
 # export OLLAMA_MODEL="qwen3-coder:30b"
+# export OLLAMA_TIMEOUT_SEC="120"
