@@ -1,17 +1,25 @@
-import sys
-import socket
 import os
-import emoji
+import pathlib
+import queue
+import random
+import socket
 import sys
 import threading
-import queue
-import pathlib
-import random
+import time
 
+import emoji
 from google.cloud import speech
-import io
 
-from meipu import Gemini, generate_response_run, transcribe_file, connect_julius, wait_till_synth_event_stop
+from meipu import (
+    Gemini,
+    connect_julius,
+    drain_julius_socket,
+    generate_response_run,
+    send_julius_command,
+    transcribe_file,
+    wait_for_julius_recogout,
+    wait_till_synth_event_stop,
+)
 
 sys.stdin.reconfigure(encoding="utf-8")
 sys.stdout.reconfigure(encoding="utf-8")
@@ -22,6 +30,9 @@ from core.main import detect_emotion_label
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
     os.environ["MEIPU_ROOT_PATH"] + "/credentials.json"
 )
+
+ASR_RESUME_GUARD_SEC = 0.4
+JULIUS_DRAIN_SEC = 0.5
 
 
 # 感情に対応する日本語の辞書
@@ -42,7 +53,7 @@ EMOTION_DICT = {
 
 EMOTION_EMOJI_DICT = {
     "other": "",
-    "alarmed": ":face_screaming_in_fear:",  # 
+    "alarmed": ":face_screaming_in_fear:",
     "angry": ":anger_symbol:",
     "calmness": "",
     "contempt": ":expressionless_face:",
@@ -56,12 +67,42 @@ EMOTION_EMOJI_DICT = {
 }
 
 
+def get_latest_wav_file_after(record_path: pathlib.Path, after_timestamp: float):
+    latest_path = None
+    latest_mtime = after_timestamp
+    for wav_path in record_path.glob("*.wav"):
+        try:
+            mtime = wav_path.stat().st_mtime
+        except OSError:
+            continue
+        if mtime > latest_mtime:
+            latest_mtime = mtime
+            latest_path = wav_path
+    return str(latest_path) if latest_path else None
+
+
+def pause_asr(julius_socket: socket.socket):
+    send_julius_command(julius_socket, "TERMINATE")
+
+
+def synth_once(voice: str, content: str):
+    print(f"SYNTH_START|uka|{voice}|{content}")
+    wait_till_synth_event_stop()
+
+
+def resume_asr_with_guard(julius_socket: socket.socket):
+    time.sleep(ASR_RESUME_GUARD_SEC)
+    drain_julius_socket(julius_socket, JULIUS_DRAIN_SEC)
+    send_julius_command(julius_socket, "RESUME")
+    return time.time()
+
 
 def main():
-    _socket = connect_julius(host="127.0.0.1", port=10500)
+    julius_socket = connect_julius(host="127.0.0.1", port=10500)
     input_queue = queue.Queue()
     output_queue = queue.Queue()
-    STT_client = speech.SpeechClient()
+    stt_client = speech.SpeechClient()
+    record_path = pathlib.Path(os.environ["MEIPU_ROOT_PATH"]).joinpath("Record")
 
     first_assistant_content_list = [
         "こんにちは、人間と話せるなんて嬉しいです！🥰",
@@ -77,13 +118,12 @@ def main():
     print("CAPTION_SETSTYLE|meipu-font|NotoSansJPwithEmoji.ttf|1,0.5,0,1|1,1,1,1,4|0,0,0,0.6,6|0,0,0,0")
     print(f"CAPTION_START|agent_context_log|meipu-font|{first_assistant_content}|3.0|CENTER|0.2|{30*60*15}")
     # モーション
-    print(f"MOTION_ADD|uka|base|../contents/uka/motion/01_happy.vmd")
-    # 発話
-    print(f"SYNTH_START|uka|mei_voice_happy|{first_assistant_content}")
-    # エージェントの発話が終わるまで待機
-    wait_till_synth_event_stop()
+    print("MOTION_ADD|uka|base|../contents/uka/motion/01_happy.vmd")
+    pause_asr(julius_socket)
+    synth_once("mei_voice_happy", first_assistant_content)
+    listening_since = resume_asr_with_guard(julius_socket)
 
-    print(f"MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
+    print("MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
     print("CAPTION_STOP|agent_context_log")
 
     # エージェントの応答を生成するスレッドを起動
@@ -92,25 +132,21 @@ def main():
 
     user_utterance = ""
     while user_utterance != "おわり":
-
         # juliusが認識するまで待機
         try:
-            message_recv = _socket.recv(1024).decode("utf-8")
-            if "<RECOGOUT>" not in message_recv:
+            if wait_for_julius_recogout(julius_socket) is None:
                 continue
-        except:
+        except Exception:
             continue
 
         # 音声ファイルを取得
-        record_path = pathlib.Path(os.environ["MEIPU_ROOT_PATH"]).joinpath("Record")
-        wav_file_list = sorted([str(_path) for _path in record_path.glob("*.wav")])
-        if len(wav_file_list) == 0:
+        latest_wav_file_path = get_latest_wav_file_after(record_path, listening_since)
+        if latest_wav_file_path is None:
             continue
-        latest_wav_file_path = wav_file_list[-1]
 
         # 音声ファイルを文字起こし
-        user_utterance = transcribe_file(STT_client, latest_wav_file_path)
-        if user_utterance == None:
+        user_utterance = transcribe_file(stt_client, latest_wav_file_path)
+        if user_utterance is None:
             continue
 
         # 音声ファイルから感情を抽出
@@ -126,6 +162,7 @@ def main():
         input_queue.put(user_input)
 
         # エージェントの応答を処理
+        spoke_any = False
         while True:
             assistant_content = output_queue.get()
             if assistant_content == "***END***":
@@ -154,6 +191,7 @@ def main():
                 if key in output_sentence:
                     voice = value
                     break
+
             motion_dict = {
                 ":anger_symbol:": "33_angry",
                 ":pouting_face:": "33_angry",
@@ -175,15 +213,24 @@ def main():
                 if key in output_sentence:
                     motion = value
                     break
-            print(f"MOTION_ADD|uka|base|../contents/uka/motion/{motion}.vmd") #./uka/motion/01_happy.vmd
-            print(f"SYNTH_START|uka|{voice}|{assistant_content}")
+
+            if not spoke_any:
+                pause_asr(julius_socket)
+                spoke_any = True
+
+            print(f"MOTION_ADD|uka|base|../contents/uka/motion/{motion}.vmd")
             print(f"CAPTION_START|agent_context_log|meipu-font|{assistant_content}|3.0|CENTER|0.2|{30*60*15}")
-            wait_till_synth_event_stop()
-            print(f"MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
+            synth_once(voice, assistant_content)
+            print("MOTION_ADD|uka|base|../contents/motions/wait/01_Wait_b.vmd")
+
+        if spoke_any:
+            listening_since = resume_asr_with_guard(julius_socket)
 
         print("CAPTION_STOP|user_context_log")
         print("CAPTION_STOP|agent_context_log")
+
         # 古い音声ファイルを削除
+        wav_file_list = sorted([str(_path) for _path in record_path.glob("*.wav")])
         if len(wav_file_list) > 10:
             for file in wav_file_list[:-10]:
                 print(f"Deleting {file}")
@@ -192,10 +239,11 @@ def main():
     thread1.join()
 
     try:
-        _socket.shutdown(socket.SHUT_RDWR)
-        _socket.close()
-    except:
+        julius_socket.shutdown(socket.SHUT_RDWR)
+        julius_socket.close()
+    except Exception:
         pass
+
 
 if __name__ == "__main__":
     main()
