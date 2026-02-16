@@ -89,11 +89,11 @@ git clone https://github.com/Meipu2-demo/Meipu2-demo.git
 ```
 
 ## 2. サブモジュールの初期化
-Meipu2-demoディレクトリに移動し、`contents` と `dictation-kit` のサブモジュールを初期化します。
+Meipu2-demoディレクトリに移動し、Gitサブモジュールを初期化します。
 
 ```bash
 cd ~/Meipu2-demo
-git submodule update --init --recursive contents dictation-kit
+git submodule update --init --recursive
 ```
 
 

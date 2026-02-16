@@ -64,48 +64,21 @@ git clone https://github.com/Meipu2-demo/Meipu2-demo.git
 ```
 
 ## 2. サブモジュールの初期化
-Meipu2-demoディレクトリに移動し、`contents` と `dictation-kit` のサブモジュールを初期化します。
+Meipu2-demoディレクトリに移動し、Gitサブモジュールを初期化します。
 
 ```powershell
 cd C:\Meipu2-demo
-git submodule update --init --recursive contents dictation-kit
+git submodule update --init --recursive
 ```
 
 ## 3. MMDAgent-EXの実行バイナリをダウンロード
 ビルド済みのMMDAgent-EXを使用します。
 
-以下のコマンドで、`MMDAgent-EX-x64-v2.1.zip` をダウンロードして `MMDAgent-EX` フォルダに展開します。
+以下のコマンドで、`MMDAgent-EX-x64-v2.X.zip` をダウンロードして `MMDAgent-EX` フォルダに展開します。
 
 ```powershell
 cd C:\Meipu2-demo
 .\core\scripts\download-mmdagent-ex-windows.bat
-```
-
-直接実行したい場合は、以下でも同じことができます。
-
-```powershell
-$zipUrl = "https://github.com/mmdagent-ex/MMDAgent-EX/releases/download/v2.1/MMDAgent-EX-x64-v2.1.zip"
-$zipFile = "MMDAgent-EX-x64-v2.1.zip"
-$tmpDir = "MMDAgent-EX-tmp"
-$targetDir = "MMDAgent-EX"
-
-if (Test-Path $zipFile) { Remove-Item $zipFile -Force }
-if (Test-Path $tmpDir) { Remove-Item $tmpDir -Recurse -Force }
-if (Test-Path $targetDir) { Remove-Item $targetDir -Recurse -Force }
-
-Invoke-WebRequest -Uri $zipUrl -OutFile $zipFile
-Expand-Archive -Path $zipFile -DestinationPath $tmpDir -Force
-
-$items = Get-ChildItem -LiteralPath $tmpDir
-if ($items.Count -eq 1 -and $items[0].PSIsContainer) {
-    Move-Item -LiteralPath $items[0].FullName -Destination $targetDir
-} else {
-    New-Item -ItemType Directory -Path $targetDir | Out-Null
-    Move-Item -Path (Join-Path $tmpDir "*") -Destination $targetDir
-}
-
-Remove-Item $zipFile -Force
-Remove-Item $tmpDir -Recurse -Force
 ```
 
 展開後、以下のような構成になります：
