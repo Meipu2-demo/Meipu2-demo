@@ -6,6 +6,6 @@ export MEIPU_GEMINI_API_KEY="YoUrApIkEyIsHeRe"
 
 # デモ専用: Ollamaを使う場合だけコメントアウトを解除
 # export USE_OLLAMA=True
-# export OLLAMA_BASE_URL="http://100.126.126.77:11434"
-# export OLLAMA_MODEL="qwen3-coder:30b"
-# export OLLAMA_TIMEOUT_SEC="120"
+# export OLLAMA_BASE_URL=http://100.126.126.77:11434
+# export OLLAMA_MODEL=gemma3:4b
+# export OLLAMA_TIMEOUT_SEC=120

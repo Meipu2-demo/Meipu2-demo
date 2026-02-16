@@ -19,7 +19,7 @@ if exist .env (
 
 if not defined USE_OLLAMA set USE_OLLAMA=False
 if not defined OLLAMA_BASE_URL set OLLAMA_BASE_URL=http://127.0.0.1:11434
-if not defined OLLAMA_MODEL set OLLAMA_MODEL=qwen3-coder:30b
+if not defined OLLAMA_MODEL set OLLAMA_MODEL=gemma3:4b
 if not defined OLLAMA_TIMEOUT_SEC set OLLAMA_TIMEOUT_SEC=120
 
 echo 環境変数が設定されました

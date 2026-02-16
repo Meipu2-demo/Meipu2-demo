@@ -7,7 +7,7 @@ import httpx
 
 OLLAMA_MESSAGE_HISTORY_MAX = 5
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen3-coder:30b")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma3:4b")
 OLLAMA_TIMEOUT_SEC = float(os.environ.get("OLLAMA_TIMEOUT_SEC", "120"))
 
 
@@ -32,6 +32,7 @@ class Ollama:
         self.ollama_messages.append({"role": "system", "content": system_prompt})
         if first_assistant_content:
             self.ollama_messages.append({"role": "assistant", "content": first_assistant_content})
+        print("Using Ollama", file=sys.stderr)
 
     def play_response(self, user_input):
         queue = []
