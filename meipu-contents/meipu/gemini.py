@@ -5,7 +5,7 @@ import google.generativeai as genai
 
 
 GEMINI_MESSAGE_HISTORY_MAX = 5
-GEMINI_MODEL = 'gemini-2.5-flash-lite'
+GEMINI_MODEL = 'gemma-3-27b-it'
 
 
 class Gemini:
