@@ -233,8 +233,9 @@ def main():
         wav_file_list = sorted([str(_path) for _path in record_path.glob("*.wav")])
         if len(wav_file_list) > 10:
             for file in wav_file_list[:-10]:
-                print(f"Deleting {file}")
-                os.remove(file)
+                pass
+                #print(f"Deleting {file}")
+                #os.remove(file)
 
     thread1.join()
 

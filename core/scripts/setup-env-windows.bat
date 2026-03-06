@@ -15,7 +15,7 @@ if exist .env (
 
 echo 環境変数が設定されました
 echo MEIPU_ROOT_PATH=%MEIPU_ROOT_PATH%
-echo MEIPU_GEMINI_API_KEY=%MEIPU_GEMINI_API_KEY%
+@REM echo MEIPU_GEMINI_API_KEY=%MEIPU_GEMINI_API_KEY%
 echo.
 echo この環境でコマンドを実行してください
 echo 例: core\scripts\julius-windows.bat
