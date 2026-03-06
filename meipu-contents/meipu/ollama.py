@@ -9,6 +9,10 @@ OLLAMA_MESSAGE_HISTORY_MAX = 5
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma3:4b")
 OLLAMA_TIMEOUT_SEC = float(os.environ.get("OLLAMA_TIMEOUT_SEC", "120"))
+OLLAMA_WARMUP_TIMEOUT_SEC = float(
+    os.environ.get("OLLAMA_WARMUP_TIMEOUT_SEC", str(OLLAMA_TIMEOUT_SEC))
+)
+OLLAMA_KEEP_ALIVE = os.environ.get("OLLAMA_KEEP_ALIVE")
 
 
 class Ollama:
@@ -17,6 +21,8 @@ class Ollama:
         self.base_url = OLLAMA_BASE_URL
         self.model = OLLAMA_MODEL
         self.timeout_sec = OLLAMA_TIMEOUT_SEC
+        self.warmup_timeout_sec = OLLAMA_WARMUP_TIMEOUT_SEC
+        self.keep_alive = OLLAMA_KEEP_ALIVE
 
         system_prompt = """
         You are my friend. You are a girl.
@@ -34,6 +40,29 @@ class Ollama:
             self.ollama_messages.append({"role": "assistant", "content": first_assistant_content})
         print("Using Ollama", file=sys.stderr)
 
+    def _request_payload(self, extra_payload=None):
+        payload = {"model": self.model}
+        if self.keep_alive:
+            payload["keep_alive"] = self.keep_alive
+        if extra_payload:
+            payload.update(extra_payload)
+        return payload
+
+    def wait_until_ready(self):
+        try:
+            with httpx.Client(timeout=self.warmup_timeout_sec) as client:
+                response = client.post(
+                    f"{self.base_url}/api/generate",
+                    json=self._request_payload({"stream": False}),
+                )
+                response.raise_for_status()
+        except Exception as e:
+            print(f"ollama: Failed to warm up model: {e}", file=sys.stderr)
+            return False
+
+        print(f"ollama: Model {self.model} is ready", file=sys.stderr)
+        return True
+
     def play_response(self, user_input):
         queue = []
         self.ollama_messages.append({"role": "user", "content": user_input})
@@ -42,11 +71,12 @@ class Ollama:
             with httpx.Client(timeout=self.timeout_sec) as client:
                 response = client.post(
                     f"{self.base_url}/api/chat",
-                    json={
-                        "model": self.model,
-                        "messages": self.ollama_messages,
-                        "stream": False,
-                    },
+                    json=self._request_payload(
+                        {
+                            "messages": self.ollama_messages,
+                            "stream": False,
+                        }
+                    ),
                 )
                 response.raise_for_status()
                 payload = response.json()

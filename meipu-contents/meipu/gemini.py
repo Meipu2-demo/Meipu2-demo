@@ -38,6 +38,9 @@ class Gemini:
             self.gemini_messages.append({"role": "model", "parts": [first_assistant_content]})
         print("Using Gemini API", file=sys.stderr)
 
+    def wait_until_ready(self):
+        return True
+
     def play_response(self, user_input):
         queue = []
         self.gemini_messages.append({"role": "user", "parts": [user_input]})

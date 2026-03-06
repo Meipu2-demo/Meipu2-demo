@@ -116,6 +116,9 @@ def main():
 
     # 字幕
     print("CAPTION_SETSTYLE|meipu-font|NotoSansJPwithEmoji.ttf|1,0.5,0,1|1,1,1,1,4|0,0,0,0.6,6|0,0,0,0")
+    print(f"CAPTION_START|agent_context_log|meipu-font|対話モデルを準備しています|30.0|CENTER|0.2|{30*60*15}")
+    llm_client.wait_until_ready()
+    print("CAPTION_STOP|agent_context_log")
     print(f"CAPTION_START|agent_context_log|meipu-font|{first_assistant_content}|3.0|CENTER|0.2|{30*60*15}")
     # モーション
     print("MOTION_ADD|uka|base|../contents/uka/motion/01_happy.vmd")
