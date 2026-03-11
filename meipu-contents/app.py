@@ -11,8 +11,8 @@ import emoji
 from google.cloud import speech
 
 from meipu import (
-    Gemini,
     connect_julius,
+    create_llm_client,
     drain_julius_socket,
     generate_response_run,
     send_julius_command,
@@ -112,10 +112,13 @@ def main():
         "こんにちは、今日のお休みはどう過ごしましたか？",
     ]
     first_assistant_content = random.choice(first_assistant_content_list)
-    gemini_client = Gemini(first_assistant_content)
+    llm_client = create_llm_client(first_assistant_content)
 
     # 字幕
     print("CAPTION_SETSTYLE|meipu-font|NotoSansJPwithEmoji.ttf|1,0.5,0,1|1,1,1,1,4|0,0,0,0.6,6|0,0,0,0")
+    print(f"CAPTION_START|agent_context_log|meipu-font|対話モデルを準備しています|30.0|CENTER|0.2|{30*60*15}")
+    llm_client.wait_until_ready()
+    print("CAPTION_STOP|agent_context_log")
     print(f"CAPTION_START|agent_context_log|meipu-font|{first_assistant_content}|3.0|CENTER|0.2|{30*60*15}")
     # モーション
     print("MOTION_ADD|uka|base|../contents/uka/motion/01_happy.vmd")
@@ -127,7 +130,7 @@ def main():
     print("CAPTION_STOP|agent_context_log")
 
     # エージェントの応答を生成するスレッドを起動
-    thread1 = threading.Thread(target=generate_response_run, args=(gemini_client, input_queue, output_queue))
+    thread1 = threading.Thread(target=generate_response_run, args=(llm_client, input_queue, output_queue))
     thread1.start()
 
     user_utterance = ""
@@ -233,8 +236,9 @@ def main():
         wav_file_list = sorted([str(_path) for _path in record_path.glob("*.wav")])
         if len(wav_file_list) > 10:
             for file in wav_file_list[:-10]:
-                print(f"Deleting {file}")
-                os.remove(file)
+                pass
+                #print(f"Deleting {file}")
+                #os.remove(file)
 
     thread1.join()
 
